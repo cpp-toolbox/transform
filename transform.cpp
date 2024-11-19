@@ -2,18 +2,6 @@
 
 Transform::Transform() : position(0.0f, 0.0f, 0.0f), rotation(0.0f, 0.0f, 0.0f), scale(1.0f, 1.0f, 1.0f) {}
 
-/*const glm::vec3 &Transform::get_position() const { return position; }*/
-/**/
-/*const glm::vec3 &Transform::get_rotation() const { return rotation; }*/
-/**/
-/*const glm::vec3 &Transform::get_scale() const { return scale; }*/
-/**/
-/*void Transform::set_position(const glm::vec3 &pos) { position = pos; }*/
-/**/
-/*void Transform::set_rotation(const glm::vec3 &rot) { rotation = rot; }*/
-/**/
-/*void Transform::set_scale(const glm::vec3 &scl) { scale = scl; }*/
-
 glm::mat4 Transform::get_transform_matrix() const {
     glm::mat4 translate = glm::translate(glm::mat4(1.0f), position);
     glm::mat4 rotate = glm::rotate(glm::mat4(1.0f), glm::radians(rotation.x), glm::vec3(1.0f, 0.0f, 0.0f));
@@ -36,4 +24,18 @@ glm::vec3 Transform::compute_forward_vector() const {
     forward.y = sin(glm::radians(rotation.x));
     forward.z = cos(glm::radians(rotation.x)) * sin(glm::radians(rotation.y));
     return glm::normalize(forward);
+}
+
+glm::vec3 Transform::compute_right_vector() const {
+    glm::vec3 forward = compute_forward_vector();
+    glm::vec3 world_up(0.0f, 1.0f, 0.0f);
+    glm::vec3 right = glm::normalize(glm::cross(forward, world_up));
+    return right;
+}
+
+glm::vec3 Transform::compute_up_vector() const {
+    glm::vec3 forward = compute_forward_vector();
+    glm::vec3 right = compute_right_vector();
+    glm::vec3 up = glm::normalize(glm::cross(right, forward));
+    return up;
 }

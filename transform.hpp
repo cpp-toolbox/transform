@@ -11,6 +11,8 @@ class Transform {
     Transform();
     glm::mat4 get_transform_matrix() const;
     glm::vec3 compute_forward_vector() const;
+    glm::vec3 compute_right_vector() const;
+    glm::vec3 compute_up_vector() const;
     void print() const;
     glm::vec3 position; // Position in 3D space
     glm::vec3 rotation; // Euler angles in degrees (pitch, yaw, roll)
