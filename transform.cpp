@@ -1,4 +1,5 @@
 #include "transform.hpp"
+#include <glm/gtx/matrix_decompose.hpp>
 
 Transform::Transform() : position(0.0f, 0.0f, 0.0f), rotation(0.0f, 0.0f, 0.0f), scale(1.0f, 1.0f, 1.0f) {}
 
@@ -10,6 +11,20 @@ glm::mat4 Transform::get_transform_matrix() const {
     glm::mat4 scale_mat = glm::scale(glm::mat4(1.0f), scale);
 
     return translate * rotate * scale_mat;
+}
+
+void Transform::set_transform_matrix(glm::mat4 transform) {
+    glm::vec3 skew;
+    glm::vec4 perspective;
+    glm::quat orientation;
+
+    if (glm::decompose(transform, this->scale, orientation, this->position, skew, perspective)) {
+        // Convert quaternion to Euler angles (in degrees)
+        glm::vec3 euler_angles = glm::eulerAngles(orientation);
+        rotation = glm::degrees(euler_angles); // Convert radians to degrees
+    } else {
+        std::cerr << "Failed to decompose transformation matrix." << std::endl;
+    }
 }
 
 void Transform::print() const {
