@@ -1,6 +1,7 @@
 #include "transform.hpp"
 #define GLM_ENABLE_EXPERIMENTAL
 #include <glm/gtx/matrix_decompose.hpp>
+#include <format>
 
 Transform::Transform() : position(0.0f, 0.0f, 0.0f), rotation(0.0f, 0.0f, 0.0f), scale(1.0f, 1.0f, 1.0f) {}
 
@@ -28,10 +29,9 @@ void Transform::set_transform_matrix(glm::mat4 transform) {
     }
 }
 
-void Transform::print() const {
-    std::cout << "Position: (" << position.x << ", " << position.y << ", " << position.z << ")\n"
-              << "Rotation: (" << rotation.x << ", " << rotation.y << ", " << rotation.z << ")\n"
-              << "Scale: (" << scale.x << ", " << scale.y << ", " << scale.z << ")\n";
+std::string Transform::get_string_repr() const {
+    return std::format("Position: ({}, {}, {})\nRotation: ({}, {}, {})\nScale: ({}, {}, {})\n", position.x, position.y,
+                       position.z, rotation.x, rotation.y, rotation.z, scale.x, scale.y, scale.z);
 }
 
 glm::vec3 Transform::compute_forward_vector() const {
