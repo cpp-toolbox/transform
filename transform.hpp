@@ -19,7 +19,7 @@ class Transform {
     std::string get_string_repr() const;
 
     glm::vec3 position; // Position in 3D space
-    glm::vec3 rotation; // Euler angles in degrees (pitch, yaw, roll)
+    glm::vec3 rotation; // Euler angles in turns (pitch, yaw, roll)
     glm::vec3 scale;    // Scale factors
 };
 
