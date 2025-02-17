@@ -17,11 +17,6 @@ glm::mat4 Transform::get_transform_matrix() const {
     float radY = rotation.y * two_pi;
     float radZ = rotation.z * two_pi;
 
-    // Print out the radian values for each axis.
-    std::cout << "Rotation around X (radians): " << radX << std::endl;
-    std::cout << "Rotation around Y (radians): " << radY << std::endl;
-    std::cout << "Rotation around Z (radians): " << radZ << std::endl;
-
     // Create the rotation matrices for each axis.
     glm::mat4 rotate = glm::rotate(glm::mat4(1.0f), radX, glm::vec3(1.0f, 0.0f, 0.0f));
     rotate = glm::rotate(rotate, radY, glm::vec3(0.0f, 1.0f, 0.0f));
