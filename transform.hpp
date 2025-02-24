@@ -23,4 +23,6 @@ class Transform {
     glm::vec3 scale;    // Scale factors
 };
 
+glm::mat4 create_billboard_transform(const glm::vec3 &right, const glm::vec3 &up, const glm::vec3 &look);
+
 #endif // TRANSFORM_HPP

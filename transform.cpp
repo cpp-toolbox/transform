@@ -2,6 +2,8 @@
 #define GLM_ENABLE_EXPERIMENTAL
 #include <glm/gtx/matrix_decompose.hpp>
 #include <format>
+#include <glm/glm.hpp>
+#include <glm/gtc/matrix_transform.hpp>
 
 Transform::Transform() : position(0.0f, 0.0f, 0.0f), rotation(0.0f, 0.0f, 0.0f), scale(1.0f, 1.0f, 1.0f) {}
 
@@ -68,4 +70,17 @@ glm::vec3 Transform::compute_up_vector() const {
     glm::vec3 right = compute_right_vector();
     glm::vec3 up = glm::normalize(glm::cross(right, forward));
     return up;
+}
+
+glm::mat4 create_billboard_transform(const glm::vec3 &right, const glm::vec3 &up, const glm::vec3 &look) {
+    // Create the rotation matrix to orient the object
+    glm::mat4 billboard_mat(1.0f);
+
+    // the matrix has its columns sideways
+    // Set the right, up, and look vectors as columns for the rotation matrix
+    billboard_mat[0] = glm::vec4(right, 0.0f); // Right vector
+    billboard_mat[1] = glm::vec4(up, 0.0f);    // Up vector
+    billboard_mat[2] = glm::vec4(-look, 0.0f); // Look vector (inverted for proper facing)
+
+    return billboard_mat;
 }
