@@ -11,24 +11,24 @@ Transform::Transform() : position(0.0f, 0.0f, 0.0f), rotation(0.0f, 0.0f, 0.0f),
 //
 constexpr float two_pi = glm::two_pi<float>();
 
+glm::mat4 Transform::get_rotation_transform_matrix() const {
+
+    // convert rotations from turns to radians.
+    float rad_x = rotation.x * two_pi;
+    float rad_y = rotation.y * two_pi;
+    float rad_z = rotation.z * two_pi;
+
+    // create the rotation matrices for each axis.
+    glm::mat4 rotate = glm::rotate(glm::mat4(1.0f), rad_x, glm::vec3(1.0f, 0.0f, 0.0f));
+    rotate = glm::rotate(rotate, rad_y, glm::vec3(0.0f, 1.0f, 0.0f));
+    rotate = glm::rotate(rotate, rad_z, glm::vec3(0.0f, 0.0f, 1.0f));
+    return rotate;
+}
+glm::mat4 Transform::get_scale_transform_matrix() const { return glm::scale(glm::mat4(1.0f), scale); }
+glm::mat4 Transform::get_translation_transform_matrix() const { return glm::translate(glm::mat4(1.0f), position); }
+
 glm::mat4 Transform::get_transform_matrix() const {
-    glm::mat4 translate = glm::translate(glm::mat4(1.0f), position);
-
-    // Convert rotations from turns to radians.
-    float radX = rotation.x * two_pi;
-    float radY = rotation.y * two_pi;
-    float radZ = rotation.z * two_pi;
-
-    // Create the rotation matrices for each axis.
-    glm::mat4 rotate = glm::rotate(glm::mat4(1.0f), radX, glm::vec3(1.0f, 0.0f, 0.0f));
-    rotate = glm::rotate(rotate, radY, glm::vec3(0.0f, 1.0f, 0.0f));
-    rotate = glm::rotate(rotate, radZ, glm::vec3(0.0f, 0.0f, 1.0f));
-
-    // Create the scale matrix from the scale vector.
-    glm::mat4 scale_mat = glm::scale(glm::mat4(1.0f), scale);
-
-    // Combine translation, rotation, and scale matrices.
-    return translate * rotate * scale_mat;
+    return get_translation_transform_matrix() * get_rotation_transform_matrix() * get_scale_transform_matrix();
 }
 
 void Transform::set_transform_matrix(glm::mat4 transform) {
@@ -80,6 +80,24 @@ glm::mat4 create_billboard_transform(const glm::vec3 &right, const glm::vec3 &up
     // Set the right, up, and look vectors as columns for the rotation matrix
     billboard_mat[0] = glm::vec4(right, 0.0f); // Right vector
     billboard_mat[1] = glm::vec4(up, 0.0f);    // Up vector
+    billboard_mat[2] = glm::vec4(-look, 0.0f); // Look vector (inverted for proper facing)
+
+    return billboard_mat;
+}
+
+glm::mat4 create_billboard_transform_with_lock_axis(const glm::vec3 &lock_axis, const glm::vec3 &look) {
+    // Calculate the right vector using the cross product of the look vector and the lock axis
+    glm::vec3 right = glm::normalize(glm::cross(look, lock_axis));
+
+    // Use the lock axis directly as the up vector (it remains fixed)
+    glm::vec3 up = lock_axis;
+
+    // Create the rotation matrix
+    glm::mat4 billboard_mat(1.0f);
+
+    // Set the right, up, and look vectors as columns for the rotation matrix
+    billboard_mat[0] = glm::vec4(right, 0.0f); // Right vector
+    billboard_mat[1] = glm::vec4(up, 0.0f);    // Up vector (lock axis)
     billboard_mat[2] = glm::vec4(-look, 0.0f); // Look vector (inverted for proper facing)
 
     return billboard_mat;

@@ -11,6 +11,9 @@ class Transform {
     Transform();
 
     glm::mat4 get_transform_matrix() const;
+    glm::mat4 get_rotation_transform_matrix() const;
+    glm::mat4 get_scale_transform_matrix() const;
+    glm::mat4 get_translation_transform_matrix() const;
     void set_transform_matrix(glm::mat4 transform);
 
     glm::vec3 compute_forward_vector() const;
@@ -24,5 +27,6 @@ class Transform {
 };
 
 glm::mat4 create_billboard_transform(const glm::vec3 &right, const glm::vec3 &up, const glm::vec3 &look);
+glm::mat4 create_billboard_transform_with_lock_axis(const glm::vec3 &lock_axis, const glm::vec3 &look);
 
 #endif // TRANSFORM_HPP
