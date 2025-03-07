@@ -24,6 +24,11 @@ class Transform {
     glm::vec3 position; // Position in 3D space
     glm::vec3 rotation; // Euler angles in turns (pitch, yaw, roll)
     glm::vec3 scale;    // Scale factors
+
+    friend std::ostream &operator<<(std::ostream &os, const Transform &transform) {
+        os << transform.get_string_repr();
+        return os;
+    }
 };
 
 glm::mat4 create_billboard_transform(const glm::vec3 &right, const glm::vec3 &up, const glm::vec3 &look);
