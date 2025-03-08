@@ -9,6 +9,8 @@
 class Transform {
   public:
     Transform();
+    Transform(glm::vec3 position, glm::vec3 rotation, glm::vec3 scale)
+        : position(position), rotation(rotation), scale(scale) {};
 
     glm::mat4 get_transform_matrix() const;
     glm::mat4 get_rotation_transform_matrix() const;
