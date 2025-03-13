@@ -31,7 +31,9 @@ class Transform {
     }
 };
 
+glm::mat4 create_billboard_transform(const Transform &transform);
 glm::mat4 create_billboard_transform(const glm::vec3 &right, const glm::vec3 &up, const glm::vec3 &look);
+glm::mat4 create_billboard_transform(const glm::vec3 &look);
 glm::mat4 create_billboard_transform_with_lock_axis(const glm::vec3 &lock_axis, const glm::vec3 &look);
 
 #endif // TRANSFORM_HPP

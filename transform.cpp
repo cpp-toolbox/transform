@@ -72,15 +72,36 @@ glm::vec3 Transform::compute_up_vector() const {
     return up;
 }
 
+glm::mat4 create_billboard_transform(const Transform &transform) {
+    return create_billboard_transform(transform.compute_right_vector(), transform.compute_up_vector(),
+                                      transform.compute_forward_vector());
+}
+
+// a billboard matrix is one such that it takes the basis and transforms it to be the basis that is passed in
+// this allows you to take quads and make them face the camera very easily which is the main use case
+// NOTE: look doesn't always have to be the direction that the camera is facing, sometimes you might want to instead
+// just get the vector that goes from the cameras position to the object as the look vector.
 glm::mat4 create_billboard_transform(const glm::vec3 &right, const glm::vec3 &up, const glm::vec3 &look) {
     // Create the rotation matrix to orient the object
     glm::mat4 billboard_mat(1.0f);
 
     // the matrix has its columns sideways
-    // Set the right, up, and look vectors as columns for the rotation matrix
-    billboard_mat[0] = glm::vec4(right, 0.0f); // Right vector
-    billboard_mat[1] = glm::vec4(up, 0.0f);    // Up vector
-    billboard_mat[2] = glm::vec4(-look, 0.0f); // Look vector (inverted for proper facing)
+    billboard_mat[0] = glm::vec4(right, 0.0f); // right vector
+    billboard_mat[1] = glm::vec4(up, 0.0f);    // up vector
+    billboard_mat[2] = glm::vec4(-look, 0.0f); // look vector (inverted for proper facing)
+
+    return billboard_mat;
+}
+
+glm::mat4 create_billboard_transform(const glm::vec3 &look) {
+    glm::vec3 up(0.0f, 1.0f, 0.0f);
+    glm::vec3 right = glm::normalize(glm::cross(look, up));
+    glm::vec3 new_up = glm::normalize(glm::cross(right, look));
+    glm::mat4 billboard_mat(1.0f);
+    // set the right, up, and look vectors as columns for the rotation matrix
+    billboard_mat[0] = glm::vec4(right, 0.0f);  // right vector
+    billboard_mat[1] = glm::vec4(new_up, 0.0f); // new up vector
+    billboard_mat[2] = glm::vec4(-look, 0.0f);  // look vector (inverted for proper facing)
 
     return billboard_mat;
 }
