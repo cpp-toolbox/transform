@@ -93,6 +93,8 @@ glm::mat4 create_billboard_transform(const glm::vec3 &right, const glm::vec3 &up
     return billboard_mat;
 }
 
+// NOTE: this is actually one that takes in a look vector and returns back
+// a matrix that makes an object look in that direction
 glm::mat4 create_billboard_transform(const glm::vec3 &look) {
     glm::vec3 up(0.0f, 1.0f, 0.0f);
     glm::vec3 right = glm::normalize(glm::cross(look, up));
