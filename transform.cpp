@@ -4,6 +4,8 @@
 #include <format>
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
+#include <glm/gtc/quaternion.hpp>
+#include <glm/gtx/quaternion.hpp>
 
 Transform::Transform() : position(0.0f, 0.0f, 0.0f), rotation(0.0f, 0.0f, 0.0f), scale(1.0f, 1.0f, 1.0f) {}
 
@@ -18,7 +20,7 @@ glm::mat4 Transform::get_rotation_transform_matrix() const {
     float rad_y = rotation.y * two_pi;
     float rad_z = rotation.z * two_pi;
 
-    // create the rotation matrices for each axis.
+    // NOTE: nested gimball
     glm::mat4 rotate = glm::rotate(glm::mat4(1.0f), rad_x, glm::vec3(1.0f, 0.0f, 0.0f));
     rotate = glm::rotate(rotate, rad_y, glm::vec3(0.0f, 1.0f, 0.0f));
     rotate = glm::rotate(rotate, rad_z, glm::vec3(0.0f, 0.0f, 1.0f));
@@ -27,23 +29,83 @@ glm::mat4 Transform::get_rotation_transform_matrix() const {
 glm::mat4 Transform::get_scale_transform_matrix() const { return glm::scale(glm::mat4(1.0f), scale); }
 glm::mat4 Transform::get_translation_transform_matrix() const { return glm::translate(glm::mat4(1.0f), position); }
 
-glm::mat4 Transform::get_transform_matrix() const {
-    return get_translation_transform_matrix() * get_rotation_transform_matrix() * get_scale_transform_matrix();
-}
-
-void Transform::set_transform_matrix(glm::mat4 transform) {
-    glm::vec3 skew;
-    glm::vec4 perspective;
-    glm::quat orientation;
-
-    if (glm::decompose(transform, this->scale, orientation, this->position, skew, perspective)) {
-        // Convert quaternion to Euler angles (in degrees)
-        glm::vec3 euler_angles = glm::eulerAngles(orientation);
-        rotation = glm::degrees(euler_angles); // Convert radians to degrees
-    } else {
-        std::cerr << "Failed to decompose transformation matrix." << std::endl;
+glm::mat4 Transform::get_transform_matrix() {
+    if (transform_needs_update) {
+        update_transform_matrix();
     }
+    return transform_matrix;
 }
+
+void Transform::update_transform_matrix() {
+    transform_matrix =
+        get_translation_transform_matrix() * get_rotation_transform_matrix() * get_scale_transform_matrix();
+    transform_needs_update = false;
+}
+
+void Transform::set_position(const glm::vec3 &new_position) {
+    position = new_position;
+    transform_needs_update = true;
+}
+
+void Transform::add_position(const glm::vec3 &add_position) {
+    position += add_position;
+    transform_needs_update = true;
+}
+
+void Transform::set_rotation(const glm::vec3 &new_rotation) {
+    rotation = new_rotation;
+    transform_needs_update = true;
+}
+
+void Transform::set_rotation_pitch(const double &new_pitch) {
+    rotation.x = new_pitch;
+    transform_needs_update = true;
+}
+void Transform::set_rotation_yaw(const double &new_yaw) {
+    rotation.y = new_yaw;
+    transform_needs_update = true;
+}
+void Transform::set_rotation_roll(const double &new_roll) {
+    rotation.z = new_roll;
+    transform_needs_update = true;
+}
+
+void Transform::add_rotation_pitch(const double &pitch) {
+    rotation.x += pitch;
+    transform_needs_update = true;
+}
+void Transform::add_rotation_yaw(const double &yaw) {
+    rotation.y += yaw;
+    transform_needs_update = true;
+}
+void Transform::add_rotation_roll(const double &roll) {
+    rotation.z += roll;
+    transform_needs_update = true;
+}
+
+void Transform::set_scale(const glm::vec3 &new_scale) {
+    scale = new_scale;
+    transform_needs_update = true;
+}
+
+void Transform::set_scale_x(const double &new_scale) {
+    scale.x = new_scale;
+    transform_needs_update = true;
+}
+
+void Transform::set_scale_y(const double &new_scale) {
+    scale.y = new_scale;
+    transform_needs_update = true;
+}
+
+void Transform::set_scale_z(const double &new_scale) {
+    scale.z = new_scale;
+    transform_needs_update = true;
+}
+
+// NOTE: subtle potential bug if you set the transform matrix and then leter change the any of rot, pos scale
+// then the new matrix will not be what you expect because it will recompute and not use this one
+void Transform::set_transform_matrix(glm::mat4 transform) { transform_matrix = transform; }
 
 std::string Transform::get_string_repr() const {
     return std::format("Position: ({}, {}, {})\nRotation: ({}, {}, {})\nScale: ({}, {}, {})\n", position.x, position.y,
@@ -81,6 +143,24 @@ glm::mat4 create_billboard_transform(const Transform &transform) {
 // this allows you to take quads and make them face the camera very easily which is the main use case
 // NOTE: look doesn't always have to be the direction that the camera is facing, sometimes you might want to instead
 // just get the vector that goes from the cameras position to the object as the look vector.
+glm::mat4 create_position_and_look_transform(const glm::vec3 &position, const glm::vec3 &look_vector,
+                                             const glm::vec3 &up_hint) {
+    // normalize the look vector (forward direction)
+    glm::vec3 z_axis = glm::normalize(look_vector);
+    // compute the right vector using cross product
+    glm::vec3 x_axis = glm::normalize(glm::cross(up_hint, z_axis));
+    // compute the up vector again to ensure orthogonality
+    glm::vec3 y_axis = glm::cross(z_axis, x_axis);
+
+    glm::mat4 transform = glm::mat4(1.0f);
+    transform[0] = glm::vec4(x_axis, 0.0f);   // Right vector
+    transform[1] = glm::vec4(y_axis, 0.0f);   // Up vector
+    transform[2] = glm::vec4(z_axis, 0.0f);   // Forward vector
+    transform[3] = glm::vec4(position, 1.0f); // Position
+
+    return transform;
+}
+
 glm::mat4 create_billboard_transform(const glm::vec3 &right, const glm::vec3 &up, const glm::vec3 &look) {
     // Create the rotation matrix to orient the object
     glm::mat4 billboard_mat(1.0f);
