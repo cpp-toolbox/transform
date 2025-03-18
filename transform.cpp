@@ -103,6 +103,12 @@ void Transform::set_scale_z(const double &new_scale) {
     transform_needs_update = true;
 }
 
+void Transform::reset() {
+    scale = glm::vec3(0);
+    rotation = glm::vec3(0);
+    position = glm::vec3(0);
+}
+
 // NOTE: subtle potential bug if you set the transform matrix and then leter change the any of rot, pos scale
 // then the new matrix will not be what you expect because it will recompute and not use this one
 void Transform::set_transform_matrix(glm::mat4 transform) { transform_matrix = transform; }
