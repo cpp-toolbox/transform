@@ -31,6 +31,8 @@ class Transform {
     void set_scale_y(const double &new_scale);
     void set_scale_z(const double &new_scale);
 
+    void reset();
+
     glm::mat4 get_transform_matrix();
     glm::vec3 get_rotation() const { return rotation; }
     glm::mat4 get_rotation_transform_matrix() const;
