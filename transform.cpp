@@ -6,6 +6,7 @@
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/quaternion.hpp>
 #include <glm/gtx/quaternion.hpp>
+#include <glm/gtx/vector_angle.hpp>
 
 Transform::Transform() : position(0.0f, 0.0f, 0.0f), rotation(0.0f, 0.0f, 0.0f), scale(1.0f, 1.0f, 1.0f) {}
 
@@ -210,4 +211,44 @@ glm::mat4 create_billboard_transform_with_lock_axis(const glm::vec3 &lock_axis, 
     billboard_mat[2] = glm::vec4(-look, 0.0f); // Look vector (inverted for proper facing)
 
     return billboard_mat;
+}
+
+/*
+                   ooo OOO OOO ooo
+               oOO        X        OOo
+           oOO   \        X        /   OOo
+        oOO       \       X       /       OOo
+      oOO          \      X      /          OOo
+    oOO             \     X     /             OOo
+   oOO               \    X    /               OOo
+  oOO                 \   X   /                 OOo
+ oOO                   \  X  /                   OOo
+ oOO                    \ X /                    OOo
+ oOO                     \X/                     OOo
+ NOTE: note that the allowable vectors span 2 * turns because you can go clockwise or counter clockwise
+*/
+bool angle_between_vectors_is_within(glm::vec3 v, glm::vec3 w, double turns) {
+    if (turns < 0.0 || turns > 1.0) {
+        return false; // invalid turn fraction
+    }
+
+    float angle_radians = glm::angle(glm::normalize(v), glm::normalize(w));
+    return angle_radians <= turns::turns_to_radians(turns);
+}
+
+/*
+                   ooo OOO OOO ooo
+               oOO        X        OOo
+           oOO   \        X turns  /   OOo
+        oOO       \       C  |    /       OOo
+      oOO          \      E  |   /          OOo
+    oOO             \     N  v  /             OOo
+   oOO               \----T----/               OOo
+  oOO                 \   E   /                 OOo
+ oOO                   \  R  /                   OOo
+ oOO                    \ X /                    OOo
+ oOO                     \X/                     OOo
+*/
+bool vector_is_within_centered_sector(glm::vec3 center, glm::vec3 other, double sector_angle_turns) {
+    return angle_between_vectors_is_within(center, other, sector_angle_turns / 2.0);
 }

@@ -6,6 +6,8 @@
 #include <glm/gtc/type_ptr.hpp>
 #include <iostream>
 
+#include "sbpt_generated_includes.hpp"
+
 class Transform {
   public:
     Transform();
@@ -35,6 +37,9 @@ class Transform {
 
     glm::mat4 get_transform_matrix();
     glm::vec3 get_rotation() const { return rotation; }
+
+    double get_rotation_pitch() const { return rotation.x; }
+    double get_rotation_yaw() const { return rotation.y; }
     glm::mat4 get_rotation_transform_matrix() const;
     glm::vec3 get_scale() const { return scale; }
     glm::mat4 get_scale_transform_matrix() const;
@@ -68,5 +73,8 @@ glm::mat4 create_position_and_look_transform(const glm::vec3 &position, const gl
 glm::mat4 create_billboard_transform(const glm::vec3 &right, const glm::vec3 &up, const glm::vec3 &look);
 glm::mat4 create_billboard_transform(const glm::vec3 &look);
 glm::mat4 create_billboard_transform_with_lock_axis(const glm::vec3 &lock_axis, const glm::vec3 &look);
+
+bool angle_between_vectors_is_within(glm::vec3 v, glm::vec3 w, double turns);
+bool vector_is_within_centered_sector(glm::vec3 center, glm::vec3 other, double sector_angle_turns);
 
 #endif // TRANSFORM_HPP
