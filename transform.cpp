@@ -110,6 +110,8 @@ void Transform::reset() {
     position = glm::vec3(0);
 }
 
+void Transform::reset_scale() { scale = glm::vec3(1); }
+
 // NOTE: subtle potential bug if you set the transform matrix and then leter change the any of rot, pos scale
 // then the new matrix will not be what you expect because it will recompute and not use this one
 void Transform::set_transform_matrix(glm::mat4 transform) { transform_matrix = transform; }

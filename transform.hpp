@@ -11,7 +11,7 @@
 class Transform {
   public:
     Transform();
-    Transform(glm::vec3 position, glm::vec3 rotation, glm::vec3 scale)
+    Transform(glm::vec3 position, glm::vec3 rotation, glm::vec3 scale = glm::vec3(1))
         : position(position), rotation(rotation), scale(scale) {};
 
     void set_position(const glm::vec3 &new_position);
@@ -34,6 +34,7 @@ class Transform {
     void set_scale_z(const double &new_scale);
 
     void reset();
+    void reset_scale();
 
     glm::mat4 get_transform_matrix();
     glm::vec3 get_rotation() const { return rotation; }
