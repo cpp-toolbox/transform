@@ -43,6 +43,9 @@ void Transform::update_transform_matrix() {
     transform_needs_update = false;
 }
 
+void Transform::set_position(const double &x, const double &y, const double &z) {
+    set_position(glm::vec3(x, y, z));
+}
 void Transform::set_position(const glm::vec3 &new_position) {
     position = new_position;
     transform_needs_update = true;

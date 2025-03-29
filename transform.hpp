@@ -14,6 +14,7 @@ class Transform {
     Transform(glm::vec3 position, glm::vec3 rotation, glm::vec3 scale = glm::vec3(1))
         : position(position), rotation(rotation), scale(scale) {};
 
+    void set_position(const double &x, const double &y, const double &z);
     void set_position(const glm::vec3 &new_position);
     void add_position(const glm::vec3 &add_position);
 
