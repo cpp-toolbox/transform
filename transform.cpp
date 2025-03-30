@@ -12,19 +12,32 @@
 //
 constexpr float two_pi = glm::two_pi<float>();
 
+// TODO: this works now, but do we want default behavior to be this, in reality this is the the way we do stuff for a
+// fps camera
 glm::mat4 Transform::get_rotation_transform_matrix() const {
 
-    // convert rotations from turns to radians.
-    float rad_x = rotation.x * two_pi;
-    float rad_y = rotation.y * two_pi;
-    float rad_z = rotation.z * two_pi;
+    // convert rotations from turns to radians
+    float rad_x = rotation.x * two_pi; // Pitch
+    float rad_y = rotation.y * two_pi; // Yaw
+    float rad_z = rotation.z * two_pi; // Roll
 
-    // NOTE: nested gimball
-    glm::mat4 rotate = glm::rotate(glm::mat4(1.0f), rad_x, glm::vec3(1.0f, 0.0f, 0.0f));
-    rotate = glm::rotate(rotate, rad_y, glm::vec3(0.0f, 1.0f, 0.0f));
-    rotate = glm::rotate(rotate, rad_z, glm::vec3(0.0f, 0.0f, 1.0f));
+    // compute yaw rotation around the up (y-axis) vector
+    glm::mat4 yaw_matrix = glm::rotate(glm::mat4(1.0f), rad_y, glm::vec3(0.0f, 1.0f, 0.0f));
+    glm::vec3 yaw_direction = yaw_matrix * glm::vec4(1.0f, 0.0f, 0.0f, 0.0f); // Yaw direction is a new vector
 
-    return rotate;
+    // compute right vector via cross product of up and yaw direction
+    glm::vec3 right_direction = glm::normalize(glm::cross(glm::vec3(0.0f, 1.0f, 0.0f), yaw_direction));
+
+    // compute pitch rotation around the right vector
+    glm::mat4 pitch_matrix = glm::rotate(glm::mat4(1.0f), rad_x, right_direction);
+
+    // Compute roll rotation around the resulting axis (yaw direction)
+    glm::mat4 roll_matrix = glm::rotate(glm::mat4(1.0f), rad_z, yaw_direction);
+
+    // Combine all rotations (yaw -> pitch -> roll)
+    glm::mat4 result = roll_matrix * pitch_matrix * yaw_matrix;
+
+    return result;
 }
 glm::mat4 Transform::get_scale_transform_matrix() const { return glm::scale(glm::mat4(1.0f), scale); }
 glm::mat4 Transform::get_translation_transform_matrix() const { return glm::translate(glm::mat4(1.0f), translation); }
