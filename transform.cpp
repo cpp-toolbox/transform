@@ -8,8 +8,6 @@
 #include <glm/gtx/quaternion.hpp>
 #include <glm/gtx/vector_angle.hpp>
 
-Transform::Transform() : position(0.0f, 0.0f, 0.0f), rotation(0.0f, 0.0f, 0.0f), scale(1.0f, 1.0f, 1.0f) {}
-
 #include <iostream> // Include iostream for std::cout
 //
 constexpr float two_pi = glm::two_pi<float>();
@@ -25,10 +23,19 @@ glm::mat4 Transform::get_rotation_transform_matrix() const {
     glm::mat4 rotate = glm::rotate(glm::mat4(1.0f), rad_x, glm::vec3(1.0f, 0.0f, 0.0f));
     rotate = glm::rotate(rotate, rad_y, glm::vec3(0.0f, 1.0f, 0.0f));
     rotate = glm::rotate(rotate, rad_z, glm::vec3(0.0f, 0.0f, 1.0f));
+
     return rotate;
 }
 glm::mat4 Transform::get_scale_transform_matrix() const { return glm::scale(glm::mat4(1.0f), scale); }
-glm::mat4 Transform::get_translation_transform_matrix() const { return glm::translate(glm::mat4(1.0f), position); }
+glm::mat4 Transform::get_translation_transform_matrix() const { return glm::translate(glm::mat4(1.0f), translation); }
+
+Transform Transform::get_inverse_transform() const {
+    glm::vec3 inverse_translation = -translation;
+    glm::vec3 inverse_rotation = -rotation;
+    // invert scale (avoid division by zero)
+    glm::vec3 inverse_scale = glm::vec3(1.0f) / scale;
+    return Transform(inverse_translation, inverse_rotation, inverse_scale, transform_application_order);
+}
 
 glm::mat4 Transform::get_transform_matrix() {
     if (transform_needs_update) {
@@ -38,21 +45,31 @@ glm::mat4 Transform::get_transform_matrix() {
 }
 
 void Transform::update_transform_matrix() {
-    transform_matrix =
-        get_translation_transform_matrix() * get_rotation_transform_matrix() * get_scale_transform_matrix();
+
+    switch (transform_application_order) {
+    case ScaleTranslationRotation:
+        transform_matrix =
+            get_rotation_transform_matrix() * get_translation_transform_matrix() * get_scale_transform_matrix();
+        break;
+    case ScaleRotationTranslation: // most likely what you want.
+        transform_matrix =
+            get_translation_transform_matrix() * get_rotation_transform_matrix() * get_scale_transform_matrix();
+        break;
+    };
+
     transform_needs_update = false;
 }
 
-void Transform::set_position(const double &x, const double &y, const double &z) {
-    set_position(glm::vec3(x, y, z));
+void Transform::set_translation(const double &x, const double &y, const double &z) {
+    set_translation(glm::vec3(x, y, z));
 }
-void Transform::set_position(const glm::vec3 &new_position) {
-    position = new_position;
+void Transform::set_translation(const glm::vec3 &new_translation) {
+    translation = new_translation;
     transform_needs_update = true;
 }
 
-void Transform::add_position(const glm::vec3 &add_position) {
-    position += add_position;
+void Transform::add_translation(const glm::vec3 &add_translation) {
+    translation += add_translation;
     transform_needs_update = true;
 }
 
@@ -69,6 +86,8 @@ void Transform::set_rotation_yaw(const double &new_yaw) {
     rotation.y = new_yaw;
     transform_needs_update = true;
 }
+void Transform::reset_yaw() { set_rotation_yaw(0); }
+void Transform::reset_pitch() { set_rotation_pitch(0); }
 void Transform::set_rotation_roll(const double &new_roll) {
     rotation.z = new_roll;
     transform_needs_update = true;
@@ -110,18 +129,49 @@ void Transform::set_scale_z(const double &new_scale) {
 void Transform::reset() {
     scale = glm::vec3(1);
     rotation = glm::vec3(0);
-    position = glm::vec3(0);
+    translation = glm::vec3(0);
+    transform_needs_update = true;
 }
 
-void Transform::reset_scale() { scale = glm::vec3(1); }
+void Transform::reset_scale() {
+    scale = glm::vec3(1);
+    transform_needs_update = true;
+}
 
 // NOTE: subtle potential bug if you set the transform matrix and then leter change the any of rot, pos scale
 // then the new matrix will not be what you expect because it will recompute and not use this one
-void Transform::set_transform_matrix(glm::mat4 transform) { transform_matrix = transform; }
+void Transform::set_transform_matrix(const glm::mat4 &matrix) {
+    bool is_translation_rotation_scale_matrix =
+        glm::all(glm::equal(matrix[3], glm::vec4(0.0f, 0.0f, 0.0f, 1.0f), glm::epsilon<float>()));
+
+    if (!is_translation_rotation_scale_matrix) {
+        std::cout << "failed to set transform matrix, because matrix is not trs matrix" << std::endl;
+        return;
+    }
+
+    glm::vec3 scale, translation, skew;
+    glm::quat rotation;
+    glm::vec4 perspective;
+
+    if (!glm::decompose(matrix, scale, rotation, translation, skew, perspective)) {
+        return;
+    }
+
+    // ensure perspective is negligible
+    if (glm::length(perspective) > glm::epsilon<float>()) {
+        return;
+    }
+
+    this->translation = translation;
+    this->rotation = glm::eulerAngles(rotation) / glm::two_pi<float>(); // convert radians to turns
+    this->scale = scale;
+
+    transform_needs_update = true;
+}
 
 std::string Transform::get_string_repr() const {
-    return std::format("Position: ({}, {}, {})\nRotation: ({}, {}, {})\nScale: ({}, {}, {})\n", position.x, position.y,
-                       position.z, rotation.x, rotation.y, rotation.z, scale.x, scale.y, scale.z);
+    return std::format("Position: ({}, {}, {})\nRotation: ({}, {}, {})\nScale: ({}, {}, {})\n", translation.x,
+                       translation.y, translation.z, rotation.x, rotation.y, rotation.z, scale.x, scale.y, scale.z);
 }
 
 glm::vec3 Transform::compute_forward_vector() const {
@@ -155,8 +205,8 @@ glm::mat4 create_billboard_transform(const Transform &transform) {
 // this allows you to take quads and make them face the camera very easily which is the main use case
 // NOTE: look doesn't always have to be the direction that the camera is facing, sometimes you might want to instead
 // just get the vector that goes from the cameras position to the object as the look vector.
-glm::mat4 create_position_and_look_transform(const glm::vec3 &position, const glm::vec3 &look_vector,
-                                             const glm::vec3 &up_hint) {
+glm::mat4 create_translation_and_look_transform(const glm::vec3 &position, const glm::vec3 &look_vector,
+                                                const glm::vec3 &up_hint) {
     // normalize the look vector (forward direction)
     glm::vec3 z_axis = glm::normalize(look_vector);
     // compute the right vector using cross product
@@ -216,6 +266,28 @@ glm::mat4 create_billboard_transform_with_lock_axis(const glm::vec3 &lock_axis, 
     billboard_mat[2] = glm::vec4(-look, 0.0f); // Look vector (inverted for proper facing)
 
     return billboard_mat;
+}
+
+bool is_rotation_translation_scale_matrix(const glm::mat4 &matrix) {
+    // check if the last row is [0, 0, 0, 1]
+    if (!glm::all(glm::equal(matrix[3], glm::vec4(0.0f, 0.0f, 0.0f, 1.0f), glm::epsilon<float>()))) {
+        return false;
+    }
+
+    glm::vec3 scale, translation, skew;
+    glm::quat rotation;
+    glm::vec4 perspective;
+
+    if (!glm::decompose(matrix, scale, rotation, translation, skew, perspective)) {
+        return false;
+    }
+
+    // ensure perspective is negligible
+    if (glm::length(perspective) > glm::epsilon<float>()) {
+        return false;
+    }
+
+    return true;
 }
 
 /*

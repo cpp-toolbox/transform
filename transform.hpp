@@ -8,20 +8,31 @@
 
 #include "sbpt_generated_includes.hpp"
 
+enum TransformApplicationOrder {
+    ScaleTranslationRotation,
+    ScaleRotationTranslation,
+};
+
 class Transform {
   public:
-    Transform();
-    Transform(glm::vec3 position, glm::vec3 rotation, glm::vec3 scale = glm::vec3(1))
-        : position(position), rotation(rotation), scale(scale) {};
+    Transform(glm::vec3 translation = glm::vec3(0), glm::vec3 rotation = glm::vec3(0), glm::vec3 scale = glm::vec3(1),
+              const TransformApplicationOrder &transform_application_order =
+                  TransformApplicationOrder::ScaleRotationTranslation)
+        : translation(translation), rotation(rotation), scale(scale),
+          transform_application_order(transform_application_order) {};
 
-    void set_position(const double &x, const double &y, const double &z);
-    void set_position(const glm::vec3 &new_position);
-    void add_position(const glm::vec3 &add_position);
+    TransformApplicationOrder transform_application_order;
+
+    void set_translation(const double &x, const double &y, const double &z);
+    void set_translation(const glm::vec3 &new_position);
+    void add_translation(const glm::vec3 &add_position);
 
     void set_rotation(const glm::vec3 &pitch_yaw_roll);
 
     void set_rotation_pitch(const double &new_pitch);
     void set_rotation_yaw(const double &new_yaw);
+    void reset_yaw();
+    void reset_pitch();
     void set_rotation_roll(const double &new_roll);
 
     void add_rotation_pitch(const double &pitch);
@@ -37,6 +48,7 @@ class Transform {
     void reset();
     void reset_scale();
 
+    Transform get_inverse_transform() const;
     glm::mat4 get_transform_matrix();
     glm::vec3 get_rotation() const { return rotation; }
 
@@ -45,9 +57,10 @@ class Transform {
     glm::mat4 get_rotation_transform_matrix() const;
     glm::vec3 get_scale() const { return scale; }
     glm::mat4 get_scale_transform_matrix() const;
-    glm::vec3 get_translation() const { return position; }
+    glm::vec3 get_translation() const { return translation; }
     glm::mat4 get_translation_transform_matrix() const;
-    void set_transform_matrix(glm::mat4 transform);
+
+    void set_transform_matrix(const glm::mat4 &matrix);
 
     glm::vec3 compute_forward_vector() const;
     glm::vec3 compute_right_vector() const;
@@ -61,17 +74,18 @@ class Transform {
 
   private:
     glm::mat4 transform_matrix = glm::mat4(1);
-    bool transform_needs_update;
+    bool transform_needs_update =
+        true; // because if you initialize and call get transform matrix the if statement shoud go through
     void update_transform_matrix();
 
-    glm::vec3 position; // Position in 3D space
-    glm::vec3 rotation; // Euler angles in turns (pitch, yaw, roll)
-    glm::vec3 scale;    // Scale factors
+    glm::vec3 translation; // Position in 3D space
+    glm::vec3 rotation;    // Euler angles in turns (pitch, yaw, roll)
+    glm::vec3 scale;       // Scale factors
 };
 
 glm::mat4 create_billboard_transform(const Transform &transform);
-glm::mat4 create_position_and_look_transform(const glm::vec3 &position, const glm::vec3 &look_vector,
-                                             const glm::vec3 &up_hint = glm::vec3(0.0f, 1.0f, 0.0f));
+glm::mat4 create_translation_and_look_transform(const glm::vec3 &position, const glm::vec3 &look_vector,
+                                                const glm::vec3 &up_hint = glm::vec3(0.0f, 1.0f, 0.0f));
 glm::mat4 create_billboard_transform(const glm::vec3 &right, const glm::vec3 &up, const glm::vec3 &look);
 glm::mat4 create_billboard_transform(const glm::vec3 &look);
 glm::mat4 create_billboard_transform_with_lock_axis(const glm::vec3 &lock_axis, const glm::vec3 &look);
