@@ -39,6 +39,7 @@ class Transform {
     void add_rotation_yaw(const double &yaw);
     void add_rotation_roll(const double &roll);
 
+    void set_scale(const double &x, const double &y, const double &z);
     void set_scale(const glm::vec3 &new_scale);
 
     void set_scale_x(const double &new_scale);

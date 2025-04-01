@@ -124,6 +124,8 @@ void Transform::set_scale(const glm::vec3 &new_scale) {
     transform_needs_update = true;
 }
 
+void Transform::set_scale(const double &x, const double &y, const double &z) { set_scale(glm::vec3(x, y, z)); }
+
 void Transform::set_scale_x(const double &new_scale) {
     scale.x = new_scale;
     transform_needs_update = true;
