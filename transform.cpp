@@ -251,7 +251,8 @@ glm::mat4 create_billboard_transform(const glm::vec3 &right, const glm::vec3 &up
 }
 
 // NOTE: this is actually one that takes in a look vector and returns back
-// a matrix that makes an object look in that direction
+// a matrix that makes an object look in that direction, this is useful if you just want everything to appear flat
+// towards you instead of having that effect where the thing moves along a cylinder around you.
 glm::mat4 create_billboard_transform(const glm::vec3 &look) {
     glm::vec3 up(0.0f, 1.0f, 0.0f);
     glm::vec3 right = glm::normalize(glm::cross(look, up));
