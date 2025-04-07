@@ -25,6 +25,8 @@ class Transform {
 
     void set_translation(const double &x, const double &y, const double &z);
     void set_translation(const glm::vec3 &new_position);
+
+    void add_translation(const double &x, const double &y, const double &z);
     void add_translation(const glm::vec3 &add_position);
 
     void set_rotation(const glm::vec3 &pitch_yaw_roll);
@@ -39,6 +41,7 @@ class Transform {
     void add_rotation_yaw(const double &yaw);
     void add_rotation_roll(const double &roll);
 
+    void set_scale(const double &scale);
     void set_scale(const double &x, const double &y, const double &z);
     void set_scale(const glm::vec3 &new_scale);
 
@@ -64,6 +67,7 @@ class Transform {
     void set_transform_matrix(const glm::mat4 &matrix);
 
     glm::vec3 compute_forward_vector() const;
+    glm::vec3 compute_xz_forward_vector() const;
     glm::vec3 compute_right_vector() const;
     glm::vec3 compute_up_vector() const;
     std::string get_string_repr() const;

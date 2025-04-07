@@ -81,6 +81,10 @@ void Transform::set_translation(const glm::vec3 &new_translation) {
     transform_needs_update = true;
 }
 
+void Transform::add_translation(const double &x, const double &y, const double &z) {
+    add_translation(glm::vec3(x, y, z));
+}
+
 void Transform::add_translation(const glm::vec3 &add_translation) {
     translation += add_translation;
     transform_needs_update = true;
@@ -116,6 +120,11 @@ void Transform::add_rotation_yaw(const double &yaw) {
 }
 void Transform::add_rotation_roll(const double &roll) {
     rotation.z += roll;
+    transform_needs_update = true;
+}
+
+void Transform::set_scale(const double &uniform_scale) {
+    scale = glm::vec3(uniform_scale);
     transform_needs_update = true;
 }
 
@@ -194,6 +203,14 @@ glm::vec3 Transform::compute_forward_vector() const {
     forward.x = cos(rotation.x * two_pi) * cos(rotation.y * two_pi);
     forward.y = sin(rotation.x * two_pi);
     forward.z = cos(rotation.x * two_pi) * sin(rotation.y * two_pi);
+    return glm::normalize(forward);
+}
+
+glm::vec3 Transform::compute_xz_forward_vector() const {
+    glm::vec3 forward;
+    forward.x = cos(rotation.y * two_pi);
+    forward.z = sin(rotation.y * two_pi);
+    forward.y = 0.0f; // No Y component
     return glm::normalize(forward);
 }
 
@@ -309,11 +326,11 @@ bool is_rotation_translation_scale_matrix(const glm::mat4 &matrix) {
 /*
                    ooo OOO OOO ooo
                oOO        X        OOo
-           oOO   \        X        /   OOo
-        oOO       \       X       /       OOo
-      oOO          \      X      /          OOo
-    oOO             \     X     /             OOo
-   oOO               \    X    /               OOo
+           oOO   \        X turns  /   OOo
+        oOO       \       X  |    /       OOo
+      oOO          \      X  |   /          OOo
+    oOO             \     X  v  /             OOo
+   oOO               \    X----/               OOo
   oOO                 \   X   /                 OOo
  oOO                   \  X  /                   OOo
  oOO                    \ X /                    OOo
