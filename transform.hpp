@@ -68,6 +68,7 @@ class Transform {
 
     glm::vec3 compute_forward_vector() const;
     glm::vec3 compute_xz_forward_vector() const;
+    glm::vec2 compute_xz_forward_vector_R2() const;
     glm::vec3 compute_right_vector() const;
     glm::vec3 compute_up_vector() const;
     std::string get_string_repr() const;

@@ -214,6 +214,13 @@ glm::vec3 Transform::compute_xz_forward_vector() const {
     return glm::normalize(forward);
 }
 
+glm::vec2 Transform::compute_xz_forward_vector_R2() const {
+    glm::vec2 forward;
+    forward.x = cos(rotation.y * two_pi);
+    forward.y = sin(rotation.y * two_pi);
+    return glm::normalize(forward);
+}
+
 glm::vec3 Transform::compute_right_vector() const {
     glm::vec3 forward = compute_forward_vector();
     glm::vec3 world_up(0.0f, 1.0f, 0.0f);
