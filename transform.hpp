@@ -23,6 +23,7 @@ class Transform {
 
     TransformApplicationOrder transform_application_order;
 
+    void set_translation_y(const double &y);
     void set_translation(const double &x, const double &y, const double &z);
     void set_translation(const glm::vec3 &new_position);
 
@@ -92,6 +93,10 @@ class Transform {
 glm::mat4 create_billboard_transform(const Transform &transform);
 glm::mat4 create_translation_and_look_transform(const glm::vec3 &position, const glm::vec3 &look_vector,
                                                 const glm::vec3 &up_hint = glm::vec3(0.0f, 1.0f, 0.0f));
+
+glm::mat4 change_of_basis_move_y_to_look_dir(const glm::vec3 &position, const glm::vec3 &look_vector,
+                                             const glm::vec3 &up_hint = glm::vec3(0.0f, 1.0f, 0.0f));
+
 glm::mat4 create_billboard_transform(const glm::vec3 &right, const glm::vec3 &up, const glm::vec3 &look);
 glm::mat4 create_billboard_transform(const glm::vec3 &look);
 glm::mat4 create_billboard_transform_with_lock_axis(const glm::vec3 &lock_axis, const glm::vec3 &look);

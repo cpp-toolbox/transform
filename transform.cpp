@@ -73,6 +73,8 @@ void Transform::update_transform_matrix() {
     transform_needs_update = false;
 }
 
+void Transform::set_translation_y(const double &y) { translation.y = y; }
+
 void Transform::set_translation(const double &x, const double &y, const double &z) {
     set_translation(glm::vec3(x, y, z));
 }
@@ -252,6 +254,24 @@ glm::mat4 create_translation_and_look_transform(const glm::vec3 &position, const
     glm::vec3 x_axis = glm::normalize(glm::cross(up_hint, z_axis));
     // compute the up vector again to ensure orthogonality
     glm::vec3 y_axis = glm::cross(z_axis, x_axis);
+
+    glm::mat4 transform = glm::mat4(1.0f);
+    transform[0] = glm::vec4(x_axis, 0.0f);   // Right vector
+    transform[1] = glm::vec4(y_axis, 0.0f);   // Up vector
+    transform[2] = glm::vec4(z_axis, 0.0f);   // Forward vector
+    transform[3] = glm::vec4(position, 1.0f); // Position
+
+    return transform;
+}
+
+glm::mat4 change_of_basis_move_y_to_look_dir(const glm::vec3 &position, const glm::vec3 &look_vector,
+                                             const glm::vec3 &up_hint) {
+    // normalize the look vector (forward direction)
+    glm::vec3 y_axis = glm::normalize(look_vector);
+    // compute the right vector using cross product
+    glm::vec3 x_axis = glm::normalize(glm::cross(up_hint, y_axis));
+    // compute the up vector again to ensure orthogonality
+    glm::vec3 z_axis = glm::cross(y_axis, x_axis);
 
     glm::mat4 transform = glm::mat4(1.0f);
     transform[0] = glm::vec4(x_axis, 0.0f);   // Right vector
