@@ -1,15 +1,14 @@
 #include "transform.hpp"
 #define GLM_ENABLE_EXPERIMENTAL
 #include <glm/gtx/matrix_decompose.hpp>
-#include <format>
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/quaternion.hpp>
 #include <glm/gtx/quaternion.hpp>
 #include <glm/gtx/vector_angle.hpp>
 
-#include <iostream> // Include iostream for std::cout
-//
+#include <iostream> 
+
 constexpr float two_pi = glm::two_pi<float>();
 
 // TODO: this works now, but do we want default behavior to be this, in reality this is the the way we do stuff for a
@@ -196,8 +195,11 @@ void Transform::set_transform_matrix(const glm::mat4 &matrix) {
 }
 
 std::string Transform::get_string_repr() const {
-    return std::format("Position: ({}, {}, {})\nRotation: ({}, {}, {})\nScale: ({}, {}, {})\n", translation.x,
-                       translation.y, translation.z, rotation.x, rotation.y, rotation.z, scale.x, scale.y, scale.z);
+    std::ostringstream oss;
+    oss << "Position: (" << translation.x << ", " << translation.y << ", " << translation.z << ")\n"
+        << "Rotation: (" << rotation.x << ", " << rotation.y << ", " << rotation.z << ")\n"
+        << "Scale: (" << scale.x << ", " << scale.y << ", " << scale.z << ")\n";
+    return oss.str();
 }
 
 glm::vec3 Transform::compute_forward_vector() const {
