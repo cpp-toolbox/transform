@@ -72,10 +72,10 @@ class Transform {
     glm::vec2 compute_xz_forward_vector_R2() const;
     glm::vec3 compute_right_vector() const;
     glm::vec3 compute_up_vector() const;
-    std::string get_string_repr() const;
+    std::string to_string() const;
 
     friend std::ostream &operator<<(std::ostream &os, const Transform &transform) {
-        os << transform.get_string_repr();
+        os << transform.to_string();
         return os;
     }
 

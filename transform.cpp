@@ -7,7 +7,7 @@
 #include <glm/gtx/quaternion.hpp>
 #include <glm/gtx/vector_angle.hpp>
 
-#include <iostream> 
+#include <iostream>
 
 constexpr float two_pi = glm::two_pi<float>();
 
@@ -194,7 +194,7 @@ void Transform::set_transform_matrix(const glm::mat4 &matrix) {
     transform_needs_update = true;
 }
 
-std::string Transform::get_string_repr() const {
+std::string Transform::to_string() const {
     std::ostringstream oss;
     oss << "Position: (" << translation.x << ", " << translation.y << ", " << translation.z << ")\n"
         << "Rotation: (" << rotation.x << ", " << rotation.y << ", " << rotation.z << ")\n"
