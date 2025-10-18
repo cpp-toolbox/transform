@@ -82,6 +82,8 @@ void Transform::set_translation(const glm::vec3 &new_translation) {
     transform_needs_update = true;
 }
 
+void Transform::reset_translation() { set_translation(glm::vec3(0)); }
+
 void Transform::add_translation(const double &x, const double &y, const double &z) {
     add_translation(glm::vec3(x, y, z));
 }
@@ -124,6 +126,8 @@ void Transform::add_rotation_roll(const double &roll) {
     transform_needs_update = true;
 }
 
+void Transform::reset_rotation() { set_rotation(glm::vec3(0)); }
+
 void Transform::set_scale(const double &uniform_scale) {
     scale = glm::vec3(uniform_scale);
     transform_needs_update = true;
@@ -152,16 +156,12 @@ void Transform::set_scale_z(const double &new_scale) {
 }
 
 void Transform::reset() {
-    scale = glm::vec3(1);
-    rotation = glm::vec3(0);
-    translation = glm::vec3(0);
-    transform_needs_update = true;
+    reset_scale();
+    reset_rotation();
+    reset_translation();
 }
 
-void Transform::reset_scale() {
-    scale = glm::vec3(1);
-    transform_needs_update = true;
-}
+void Transform::reset_scale() { set_scale(glm::vec3(1)); }
 
 // NOTE: subtle potential bug if you set the transform matrix and then leter change the any of rot, pos scale
 // then the new matrix will not be what you expect because it will recompute and not use this one
