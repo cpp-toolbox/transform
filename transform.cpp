@@ -49,14 +49,9 @@ Transform Transform::get_inverse_transform() const {
     return Transform(inverse_translation, inverse_rotation, inverse_scale, transform_application_order);
 }
 
-glm::mat4 Transform::get_transform_matrix() {
-    if (transform_needs_update) {
-        update_transform_matrix();
-    }
-    return transform_matrix;
-}
+glm::mat4 Transform::get_transform_matrix() const {
 
-void Transform::update_transform_matrix() {
+    glm::mat4 transform_matrix = glm::mat4(1);
 
     switch (transform_application_order) {
     case ScaleTranslationRotation:
@@ -68,8 +63,30 @@ void Transform::update_transform_matrix() {
             get_translation_transform_matrix() * get_rotation_transform_matrix() * get_scale_transform_matrix();
         break;
     };
+    return transform_matrix;
+}
 
-    transform_needs_update = false;
+glm::mat4 Transform::get_full_transform_matrix() const {
+    glm::mat4 transform_matrix(1.0f);
+
+    switch (transform_application_order) {
+    case ScaleTranslationRotation:
+        transform_matrix =
+            get_rotation_transform_matrix() * get_translation_transform_matrix() * get_scale_transform_matrix();
+        break;
+
+    case ScaleRotationTranslation: // most common
+        transform_matrix =
+            get_translation_transform_matrix() * get_rotation_transform_matrix() * get_scale_transform_matrix();
+        break;
+    }
+
+    // If there is a child, multiply its transform as well
+    if (child) {
+        transform_matrix *= child->get_full_transform_matrix();
+    }
+
+    return transform_matrix;
 }
 
 void Transform::set_translation_y(const double &y) { translation.y = y; }
@@ -77,10 +94,7 @@ void Transform::set_translation_y(const double &y) { translation.y = y; }
 void Transform::set_translation(const double &x, const double &y, const double &z) {
     set_translation(glm::vec3(x, y, z));
 }
-void Transform::set_translation(const glm::vec3 &new_translation) {
-    translation = new_translation;
-    transform_needs_update = true;
-}
+void Transform::set_translation(const glm::vec3 &new_translation) { translation = new_translation; }
 
 void Transform::reset_translation() { set_translation(glm::vec3(0)); }
 
@@ -88,72 +102,33 @@ void Transform::add_translation(const double &x, const double &y, const double &
     add_translation(glm::vec3(x, y, z));
 }
 
-void Transform::add_translation(const glm::vec3 &add_translation) {
-    translation += add_translation;
-    transform_needs_update = true;
-}
+void Transform::add_translation(const glm::vec3 &add_translation) { translation += add_translation; }
 
-void Transform::set_rotation(const glm::vec3 &new_rotation) {
-    rotation = new_rotation;
-    transform_needs_update = true;
-}
+void Transform::set_rotation(const glm::vec3 &new_rotation) { rotation = new_rotation; }
 
-void Transform::set_rotation_pitch(const double &new_pitch) {
-    rotation.x = new_pitch;
-    transform_needs_update = true;
-}
-void Transform::set_rotation_yaw(const double &new_yaw) {
-    rotation.y = new_yaw;
-    transform_needs_update = true;
-}
+void Transform::set_rotation_pitch(const double &new_pitch) { rotation.x = new_pitch; }
+void Transform::set_rotation_yaw(const double &new_yaw) { rotation.y = new_yaw; }
 void Transform::reset_yaw() { set_rotation_yaw(0); }
 void Transform::reset_pitch() { set_rotation_pitch(0); }
-void Transform::set_rotation_roll(const double &new_roll) {
-    rotation.z = new_roll;
-    transform_needs_update = true;
-}
+void Transform::set_rotation_roll(const double &new_roll) { rotation.z = new_roll; }
 
-void Transform::add_rotation_pitch(const double &pitch) {
-    rotation.x += pitch;
-    transform_needs_update = true;
-}
-void Transform::add_rotation_yaw(const double &yaw) {
-    rotation.y += yaw;
-    transform_needs_update = true;
-}
-void Transform::add_rotation_roll(const double &roll) {
-    rotation.z += roll;
-    transform_needs_update = true;
-}
+void Transform::add_rotation_pitch(const double &pitch) { rotation.x += pitch; }
+void Transform::add_rotation_yaw(const double &yaw) { rotation.y += yaw; }
+void Transform::add_rotation_roll(const double &roll) { rotation.z += roll; }
 
 void Transform::reset_rotation() { set_rotation(glm::vec3(0)); }
 
-void Transform::set_scale(const double &uniform_scale) {
-    scale = glm::vec3(uniform_scale);
-    transform_needs_update = true;
-}
+void Transform::set_scale(const double &uniform_scale) { scale = glm::vec3(uniform_scale); }
 
-void Transform::set_scale(const glm::vec3 &new_scale) {
-    scale = new_scale;
-    transform_needs_update = true;
-}
+void Transform::set_scale(const glm::vec3 &new_scale) { scale = new_scale; }
 
 void Transform::set_scale(const double &x, const double &y, const double &z) { set_scale(glm::vec3(x, y, z)); }
 
-void Transform::set_scale_x(const double &new_scale) {
-    scale.x = new_scale;
-    transform_needs_update = true;
-}
+void Transform::set_scale_x(const double &new_scale) { scale.x = new_scale; }
 
-void Transform::set_scale_y(const double &new_scale) {
-    scale.y = new_scale;
-    transform_needs_update = true;
-}
+void Transform::set_scale_y(const double &new_scale) { scale.y = new_scale; }
 
-void Transform::set_scale_z(const double &new_scale) {
-    scale.z = new_scale;
-    transform_needs_update = true;
-}
+void Transform::set_scale_z(const double &new_scale) { scale.z = new_scale; }
 
 void Transform::reset() {
     reset_scale();
@@ -190,8 +165,6 @@ void Transform::set_transform_matrix(const glm::mat4 &matrix) {
     this->translation = translation;
     this->rotation = glm::eulerAngles(rotation) / glm::two_pi<float>(); // convert radians to turns
     this->scale = scale;
-
-    transform_needs_update = true;
 }
 
 std::string Transform::to_string() const {
@@ -200,6 +173,36 @@ std::string Transform::to_string() const {
         << "Rotation: (" << rotation.x << ", " << rotation.y << ", " << rotation.z << ")\n"
         << "Scale: (" << scale.x << ", " << scale.y << ", " << scale.z << ")\n";
     return oss.str();
+}
+
+glm::vec3 Transform::get_full_translation() const {
+    if (child)
+        return translation + child->get_full_translation();
+    return translation;
+}
+
+glm::vec3 Transform::get_full_scale() const {
+    if (child)
+        return scale * child->get_full_scale();
+    return scale;
+}
+
+glm::vec3 Transform::get_full_rotation() const {
+    if (child)
+        return rotation + child->get_full_rotation();
+    return rotation;
+}
+
+double Transform::get_full_rotation_pitch() const {
+    if (child)
+        return rotation.x + child->get_full_rotation_pitch();
+    return rotation.x;
+}
+
+double Transform::get_full_rotation_yaw() const {
+    if (child)
+        return rotation.y + child->get_full_rotation_yaw();
+    return rotation.y;
 }
 
 glm::vec3 Transform::compute_forward_vector() const {
