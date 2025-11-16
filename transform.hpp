@@ -135,6 +135,16 @@ class Transform {
 
     void set_transform_matrix(const glm::mat4 &matrix);
 
+    std::optional<glm::mat4> transform_matrix_override;
+    /**
+     * @brief sets the transform matrix overide which will be used until you clear the override
+     *
+     * the matrix override is used instead of constructing the matrix from the internal translation, scale, and rotation
+     * properties until it is cleared
+     */
+    void set_transform_matrix_override(const glm::mat4 &transform);
+    void clear_transform_matrix_override();
+
     void reset();
     void reset_scale();
     // endfold
@@ -209,17 +219,5 @@ class Transform {
 };
 
 glm::mat4 create_billboard_transform(const Transform &transform);
-glm::mat4 create_translation_and_look_transform(const glm::vec3 &position, const glm::vec3 &look_vector,
-                                                const glm::vec3 &up_hint = glm::vec3(0.0f, 1.0f, 0.0f));
-
-glm::mat4 change_of_basis_move_y_to_look_dir(const glm::vec3 &position, const glm::vec3 &look_vector,
-                                             const glm::vec3 &up_hint = glm::vec3(0.0f, 1.0f, 0.0f));
-
-glm::mat4 create_billboard_transform(const glm::vec3 &right, const glm::vec3 &up, const glm::vec3 &look);
-glm::mat4 create_billboard_transform(const glm::vec3 &look);
-glm::mat4 create_billboard_transform_with_lock_axis(const glm::vec3 &lock_axis, const glm::vec3 &look);
-
-bool angle_between_vectors_is_within(glm::vec3 v, glm::vec3 w, double turns);
-bool vector_is_within_centered_sector(glm::vec3 center, glm::vec3 other, double sector_angle_turns);
 
 #endif // TRANSFORM_HPP
