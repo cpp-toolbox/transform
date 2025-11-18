@@ -104,7 +104,9 @@ class Transform {
 
     // startfold setters
 
+    void set_translation_x(const double &x);
     void set_translation_y(const double &y);
+    void set_translation_z(const double &z);
     void set_translation(const double &x, const double &y, const double &z);
     void set_translation(const glm::vec3 &new_position);
     void reset_translation();

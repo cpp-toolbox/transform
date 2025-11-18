@@ -92,7 +92,9 @@ glm::mat4 Transform::get_full_transform_matrix() const {
     return transform_matrix;
 }
 
+void Transform::set_translation_x(const double &x) { translation.x = x; }
 void Transform::set_translation_y(const double &y) { translation.y = y; }
+void Transform::set_translation_z(const double &z) { translation.z = z; }
 
 void Transform::set_translation(const double &x, const double &y, const double &z) {
     set_translation(glm::vec3(x, y, z));
