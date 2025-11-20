@@ -30,7 +30,8 @@ enum TransformApplicationOrder {
 
 class Transform {
   public:
-    Transform(glm::vec3 translation = glm::vec3(0), glm::vec3 rotation = glm::vec3(0), glm::vec3 scale = glm::vec3(1),
+    Transform(glm::dvec3 translation = glm::dvec3(0), glm::dvec3 rotation = glm::dvec3(0),
+              glm::dvec3 scale = glm::dvec3(1),
               const TransformApplicationOrder &transform_application_order =
                   TransformApplicationOrder::ScaleRotationTranslation)
         : translation(translation), rotation(rotation), scale(scale),
@@ -108,13 +109,13 @@ class Transform {
     void set_translation_y(const double &y);
     void set_translation_z(const double &z);
     void set_translation(const double &x, const double &y, const double &z);
-    void set_translation(const glm::vec3 &new_position);
+    void set_translation(const glm::dvec3 &new_position);
     void reset_translation();
 
     void add_translation(const double &x, const double &y, const double &z);
-    void add_translation(const glm::vec3 &add_position);
+    void add_translation(const glm::dvec3 &add_position);
 
-    void set_rotation(const glm::vec3 &pitch_yaw_roll);
+    void set_rotation(const glm::dvec3 &pitch_yaw_roll);
 
     void set_rotation_pitch(const double &new_pitch);
     void set_rotation_yaw(const double &new_yaw);
@@ -129,22 +130,22 @@ class Transform {
 
     void set_scale(const double &scale);
     void set_scale(const double &x, const double &y, const double &z);
-    void set_scale(const glm::vec3 &new_scale);
+    void set_scale(const glm::dvec3 &new_scale);
 
     void set_scale_x(const double &new_scale);
     void set_scale_y(const double &new_scale);
     void set_scale_z(const double &new_scale);
 
-    void set_transform_matrix(const glm::mat4 &matrix);
+    void set_transform_matrix(const glm::dmat4 &matrix);
 
-    std::optional<glm::mat4> transform_matrix_override;
+    std::optional<glm::dmat4> transform_matrix_override;
     /**
      * @brief sets the transform matrix overide which will be used until you clear the override
      *
      * the matrix override is used instead of constructing the matrix from the internal translation, scale, and rotation
      * properties until it is cleared
      */
-    void set_transform_matrix_override(const glm::mat4 &transform);
+    void set_transform_matrix_override(const glm::dmat4 &transform);
     void clear_transform_matrix_override();
 
     void reset();
@@ -155,13 +156,13 @@ class Transform {
     // NOTE: missing a few of the "full" getters for certain matrices here
 
     Transform get_inverse_transform() const;
-    glm::mat4 get_transform_matrix() const;
-    glm::mat4 get_full_transform_matrix() const;
+    glm::dmat4 get_transform_matrix() const;
+    glm::dmat4 get_full_transform_matrix() const;
 
     // rotation
 
-    glm::vec3 get_rotation() const { return rotation; }
-    glm::vec3 get_full_rotation() const;
+    glm::dvec3 get_rotation() const { return rotation; }
+    glm::dvec3 get_full_rotation() const;
 
     double get_rotation_pitch() const { return rotation.x; }
     double get_full_rotation_pitch() const;
@@ -169,31 +170,31 @@ class Transform {
     double get_rotation_yaw() const { return rotation.y; }
     double get_full_rotation_yaw() const;
 
-    glm::mat4 get_rotation_transform_matrix() const;
+    glm::dmat4 get_rotation_transform_matrix() const;
 
     // scale
 
-    glm::vec3 get_scale() const { return scale; }
-    glm::vec3 get_full_scale() const;
+    glm::dvec3 get_scale() const { return scale; }
+    glm::dvec3 get_full_scale() const;
 
-    glm::mat4 get_scale_transform_matrix() const;
+    glm::dmat4 get_scale_transform_matrix() const;
 
     // translation
 
-    glm::vec3 get_translation() const { return translation; }
-    glm::vec3 get_full_translation() const;
+    glm::dvec3 get_translation() const { return translation; }
+    glm::dvec3 get_full_translation() const;
 
-    glm::mat4 get_translation_transform_matrix() const;
+    glm::dmat4 get_translation_transform_matrix() const;
 
     // endfold
 
     // directional vectors
 
-    glm::vec3 compute_forward_vector() const;
-    glm::vec3 compute_xz_forward_vector() const;
-    glm::vec2 compute_xz_forward_vector_R2() const;
-    glm::vec3 compute_right_vector() const;
-    glm::vec3 compute_up_vector() const;
+    glm::dvec3 compute_forward_vector() const;
+    glm::dvec3 compute_xz_forward_vector() const;
+    glm::dvec2 compute_xz_forward_vector_R2() const;
+    glm::dvec3 compute_right_vector() const;
+    glm::dvec3 compute_up_vector() const;
     std::string to_string() const;
 
     friend std::ostream &operator<<(std::ostream &os, const Transform &transform) {
@@ -215,11 +216,11 @@ class Transform {
     // NOTE: this is here because if it's not true, then we don't have to recompute it
     bool modified_since_last_call_to_get_transform_matrix;
 
-    glm::vec3 translation; // Position in 3D space
-    glm::vec3 rotation;    // Euler angles in turns (pitch, yaw, roll)
-    glm::vec3 scale;       // Scale factors
+    glm::dvec3 translation; // Position in 3D space
+    glm::dvec3 rotation;    // Euler angles in turns (pitch, yaw, roll)
+    glm::dvec3 scale;       // Scale factors
 };
 
-glm::mat4 create_billboard_transform(const Transform &transform);
+glm::dmat4 create_billboard_transform(const Transform &transform);
 
 #endif // TRANSFORM_HPP
