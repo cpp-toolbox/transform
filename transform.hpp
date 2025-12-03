@@ -191,6 +191,7 @@ class Transform {
     // directional vectors
 
     glm::dvec3 compute_forward_vector() const;
+    /// @brief gets the forward vector with y component set to 0
     glm::dvec3 compute_xz_forward_vector() const;
     glm::dvec2 compute_xz_forward_vector_R2() const;
     glm::dvec3 compute_right_vector() const;
