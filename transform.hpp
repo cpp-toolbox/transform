@@ -34,8 +34,8 @@ class Transform {
               glm::dvec3 scale = glm::dvec3(1),
               const TransformApplicationOrder &transform_application_order =
                   TransformApplicationOrder::ScaleRotationTranslation)
-        : translation(translation), rotation(rotation), scale(scale),
-          transform_application_order(transform_application_order) {};
+        : transform_application_order(transform_application_order), translation(translation), rotation(rotation),
+          scale(scale) {};
 
     /**
      * @brief Deep copy constructor.
