@@ -39,10 +39,10 @@ glm::dmat4 Transform::get_rotation_transform_matrix() const {
     return result;
 }
 glm::dmat4 Transform::get_scale_transform_matrix() const { return glm::scale(glm::dmat4(1.0f), scale); }
-glm::dmat4 Transform::get_translation_transform_matrix() const { return glm::translate(glm::dmat4(1.0f), translation); }
+glm::dmat4 Transform::get_translation_transform_matrix() const { return glm::translate(glm::dmat4(1.0f), position); }
 
 Transform Transform::get_inverse_transform() const {
-    glm::dvec3 inverse_translation = -translation;
+    glm::dvec3 inverse_translation = -position;
     glm::dvec3 inverse_rotation = -rotation;
     // invert scale (avoid division by zero)
     glm::dvec3 inverse_scale = glm::dvec3(1.0f) / scale;
@@ -92,14 +92,14 @@ glm::dmat4 Transform::get_full_transform_matrix() const {
     return transform_matrix;
 }
 
-void Transform::set_translation_x(const double &x) { translation.x = x; }
-void Transform::set_translation_y(const double &y) { translation.y = y; }
-void Transform::set_translation_z(const double &z) { translation.z = z; }
+void Transform::set_translation_x(const double &x) { position.x = x; }
+void Transform::set_translation_y(const double &y) { position.y = y; }
+void Transform::set_translation_z(const double &z) { position.z = z; }
 
 void Transform::set_translation(const double &x, const double &y, const double &z) {
     set_translation(glm::dvec3(x, y, z));
 }
-void Transform::set_translation(const glm::dvec3 &new_translation) { translation = new_translation; }
+void Transform::set_translation(const glm::dvec3 &new_translation) { position = new_translation; }
 
 void Transform::reset_translation() { set_translation(glm::dvec3(0)); }
 
@@ -107,7 +107,7 @@ void Transform::add_translation(const double &x, const double &y, const double &
     add_translation(glm::dvec3(x, y, z));
 }
 
-void Transform::add_translation(const glm::dvec3 &add_translation) { translation += add_translation; }
+void Transform::add_translation(const glm::dvec3 &add_translation) { position += add_translation; }
 
 void Transform::set_rotation(const glm::dvec3 &new_rotation) { rotation = new_rotation; }
 
@@ -167,7 +167,7 @@ void Transform::set_transform_matrix(const glm::dmat4 &matrix) {
         return;
     }
 
-    this->translation = translation;
+    this->position = translation;
     this->rotation = glm::eulerAngles(rotation) / glm::two_pi<double>(); // convert radians to turns
     this->scale = scale;
 }
@@ -178,7 +178,7 @@ void Transform::clear_transform_matrix_override() { transform_matrix_override = 
 
 std::string Transform::to_string() const {
     std::ostringstream oss;
-    oss << "Position: (" << translation.x << ", " << translation.y << ", " << translation.z << ")\n"
+    oss << "Position: (" << position.x << ", " << position.y << ", " << position.z << ")\n"
         << "Rotation: (" << rotation.x << ", " << rotation.y << ", " << rotation.z << ")\n"
         << "Scale: (" << scale.x << ", " << scale.y << ", " << scale.z << ")\n";
     return oss.str();
@@ -186,8 +186,8 @@ std::string Transform::to_string() const {
 
 glm::dvec3 Transform::get_full_translation() const {
     if (child)
-        return translation + child->get_full_translation();
-    return translation;
+        return position + child->get_full_translation();
+    return position;
 }
 
 glm::dvec3 Transform::get_full_scale() const {
@@ -250,6 +250,16 @@ glm::dvec3 Transform::compute_up_vector() const {
     glm::dvec3 up = glm::normalize(glm::cross(right, forward));
     return up;
 }
+
+void set_position(Transform *t, glm::dvec3 position) { t->position = position; }
+void set_position_x(Transform *t, double x) { t->position.x = x; }
+void set_position_y(Transform *t, double y) { t->position.y = y; }
+void set_position_z(Transform *t, double z) { t->position.z = z; }
+
+void set_rotation(Transform *t, glm::dvec3 new_rotation) { t->rotation = new_rotation; }
+void set_rotation_pitch(Transform *t, double new_pitch) { t->rotation.x = new_pitch; }
+void set_rotation_yaw(Transform *t, double new_yaw) { t->rotation.y = new_yaw; }
+void set_rotation_roll(Transform *t, double new_roll) { t->rotation.z = new_roll; }
 
 glm::dmat4 create_billboard_transform(const Transform &transform) {
     return linalg_utils::create_billboard_transform(transform.compute_right_vector(), transform.compute_up_vector(),

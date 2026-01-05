@@ -28,13 +28,12 @@ enum TransformApplicationOrder {
  *
  */
 
-class Transform {
-  public:
+struct Transform {
     Transform(glm::dvec3 translation = glm::dvec3(0), glm::dvec3 rotation = glm::dvec3(0),
               glm::dvec3 scale = glm::dvec3(1),
               const TransformApplicationOrder &transform_application_order =
                   TransformApplicationOrder::ScaleRotationTranslation)
-        : transform_application_order(transform_application_order), translation(translation), rotation(rotation),
+        : transform_application_order(transform_application_order), position(translation), rotation(rotation),
           scale(scale) {};
 
     /**
@@ -47,7 +46,7 @@ class Transform {
      * @param other The Transform instance to copy.
      */
     Transform(const Transform &other)
-        : translation(other.translation), rotation(other.rotation), scale(other.scale),
+        : position(other.position), rotation(other.rotation), scale(other.scale),
           transform_application_order(other.transform_application_order) {
 
         // NOTE: his is recursive because the = invokes the copy assignment operator, this function just kicks off the
@@ -70,7 +69,7 @@ class Transform {
         if (this == &other)
             return *this;
 
-        translation = other.translation;
+        position = other.position;
         rotation = other.rotation;
         scale = other.scale;
         transform_application_order = other.transform_application_order;
@@ -117,6 +116,8 @@ class Transform {
 
     void set_rotation(const glm::dvec3 &pitch_yaw_roll);
 
+    // TODO: shouldn't we also just have rotation about axes, because that would be good too, but then the application
+    // order matters right?
     void set_rotation_pitch(const double &new_pitch);
     void set_rotation_yaw(const double &new_yaw);
     void reset_yaw();
@@ -138,7 +139,6 @@ class Transform {
 
     void set_transform_matrix(const glm::dmat4 &matrix);
 
-    std::optional<glm::dmat4> transform_matrix_override;
     /**
      * @brief sets the transform matrix overide which will be used until you clear the override
      *
@@ -181,7 +181,7 @@ class Transform {
 
     // translation
 
-    glm::dvec3 get_translation() const { return translation; }
+    glm::dvec3 get_translation() const { return position; }
     glm::dvec3 get_full_translation() const;
 
     glm::dmat4 get_translation_transform_matrix() const;
@@ -208,19 +208,30 @@ class Transform {
         child = std::make_unique<Transform>(std::move(new_child));
     }
 
+    std::optional<glm::dmat4> transform_matrix_override;
     std::unique_ptr<Transform> child = nullptr;
 
-  private:
     // TODO: remove this
     void update_transform_matrix();
 
     // NOTE: this is here because if it's not true, then we don't have to recompute it
     bool modified_since_last_call_to_get_transform_matrix;
 
-    glm::dvec3 translation; // Position in 3D space
-    glm::dvec3 rotation;    // Euler angles in turns (pitch, yaw, roll)
-    glm::dvec3 scale;       // Scale factors
+    glm::dvec3 position;
+    glm::dvec3 rotation; // Euler angles in turns (pitch, yaw, roll)
+    glm::dvec3 scale;    // Scale factors
 };
+
+// this is the start of the new data oriented design. all above member functions are eventually deprecated.
+void set_position(Transform *t, glm::dvec3 position);
+void set_position_x(Transform *t, double x);
+void set_position_y(Transform *t, double y);
+void set_position_z(Transform *t, double z);
+
+void set_rotation(Transform *t, glm::dvec3 new_rotation);
+void set_rotation_pitch(Transform *t, double new_pitch);
+void set_rotation_yaw(Transform *t, double new_yaw);
+void set_rotation_roll(Transform *t, double new_roll);
 
 glm::dmat4 create_billboard_transform(const Transform &transform);
 
