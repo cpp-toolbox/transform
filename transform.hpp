@@ -204,7 +204,7 @@ struct Transform {
     }
 
     void set_child(Transform new_child) {
-        // Create a new Transform on the heap by moving 'new_child' into it.
+        // create a new transform on the heap by moving 'new_child' into it.
         child = std::make_unique<Transform>(std::move(new_child));
     }
 
